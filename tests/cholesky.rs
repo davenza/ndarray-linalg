@@ -147,3 +147,27 @@ fn cholesky_solve() {
     cholesky_solve!(c64, 1e-9);
     cholesky_solve!(c32, 1e-3);
 }
+
+use ndarray::{arr1,arr2};
+#[test]
+fn cholesky_solve_fail() {
+
+    let a: Array2<f64> = arr2(&[[2.7518138512052546, 0.0, 0.0],
+        [-3.0030534432813334, 0.5503895871967794, 0.0],
+        [0.0, 0.0, 0.4472135954999579]]);
+    let x: Array1<f64> = arr1(&[-0.3633966736383765772089, -9.2503560214093027980198, 0.0]);
+    let b = a.dot(&x);
+    println!("a = \n{:#?}", a);
+    println!("x = \n{:#?}", x);
+    println!("b = \n{:#?}", b);
+    println!("Solution = \n{:#?}", &a.solvec(&b).unwrap());
+    assert_close_l2!(&a.solvec(&b).unwrap(), &x, 1e-9);
+    assert_close_l2!(&a.solvec_into(b.clone()).unwrap(), &x, 1e-9);
+    assert_close_l2!(&a.solvec_inplace(&mut b.clone()).unwrap(), &x, 1e-9);
+    assert_close_l2!(&a.factorizec(UPLO::Upper).unwrap().solvec(&b).unwrap(), &x, 1e-9);
+    assert_close_l2!(&a.factorizec(UPLO::Lower).unwrap().solvec(&b).unwrap(), &x, 1e-9);
+    assert_close_l2!(&a.factorizec(UPLO::Upper).unwrap().solvec_into(b.clone()).unwrap(), &x, 1e-9);
+    assert_close_l2!(&a.factorizec(UPLO::Lower).unwrap().solvec_into(b.clone()).unwrap(), &x, 1e-9);
+    assert_close_l2!(&a.factorizec(UPLO::Upper).unwrap().solvec_inplace(&mut b.clone()).unwrap(), &x, 1e-9);
+    assert_close_l2!(&a.factorizec(UPLO::Lower).unwrap().solvec_inplace(&mut b.clone()).unwrap(), &x, 1e-9);
+}
